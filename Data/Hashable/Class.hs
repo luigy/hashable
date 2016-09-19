@@ -1,5 +1,8 @@
 {-# LANGUAGE BangPatterns, CPP, ForeignFunctionInterface, MagicHash,
              ScopedTypeVariables, UnliftedFFITypes #-}
+#ifdef __GHCJS__
+{-# LANGUAGE JavaScriptFFI, UnboxedTuples, GHCForeignImportPrim #-}
+#endif
 #ifdef GENERICS
 {-# LANGUAGE DefaultSignatures, FlexibleContexts #-}
 #endif
@@ -48,7 +51,9 @@ import Data.Int (Int8, Int16, Int32, Int64)
 import Data.List (foldl')
 import Data.Ratio (Ratio, denominator, numerator)
 import qualified Data.Text as T
+#ifndef __GHCJS__
 import qualified Data.Text.Array as TA
+#endif
 import qualified Data.Text.Internal as T
 import qualified Data.Text.Lazy as TL
 import Data.Typeable
@@ -64,6 +69,9 @@ import GHC.Prim (ThreadId#)
 import System.IO.Unsafe (unsafePerformIO)
 import System.Mem.StableName
 import Data.Unique (Unique, hashUnique)
+#ifdef __GHCJS__
+import Data.JSString (JSString)
+#endif
 
 #if MIN_VERSION_base(4,7,0)
 import Data.Fixed (Fixed(..))
@@ -116,7 +124,11 @@ import qualified Data.ByteString.Short.Internal as BSI
 #  define MIN_VERSION_integer_gmp_1_0_0
 # endif
 
+#ifndef __GHCJS__
 import GHC.Exts (Int(..))
+#else
+import GHC.Exts (Int(..), Int#)
+#endif
 import GHC.Integer.GMP.Internals (Integer(..))
 # if defined(MIN_VERSION_integer_gmp_1_0_0)
 import GHC.Exts (sizeofByteArray#)
@@ -480,9 +492,15 @@ instance Hashable BSI.ShortByteString where
 #endif
 
 instance Hashable T.Text where
+#ifndef __GHCJS__
     hashWithSalt salt (T.Text arr off len) =
         hashByteArrayWithSalt (TA.aBA arr) (off `shiftL` 1) (len `shiftL` 1)
         salt
+#else
+    hashWithSalt salt (T.Text txt) =
+        let (# ba, len #) = js_textFromJSString txt
+        in hashByteArrayWithSalt ba (0 `shiftL` 1) (I# len `shiftL` 1) salt
+#endif
 
 instance Hashable TL.Text where
     hashWithSalt = TL.foldlChunks hashWithSalt
@@ -625,4 +643,10 @@ instance Hashable a => Hashable (WrappedMonoid a) where
 
 instance Hashable a => Hashable (Option a) where
     hashWithSalt p (Option a) = hashWithSalt p a
+#endif
+
+#ifdef __GHCJS__
+foreign import javascript unsafe
+  "h$textFromString"
+  js_textFromJSString :: JSString -> (# ByteArray#, Int# #)
 #endif
