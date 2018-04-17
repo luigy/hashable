@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 702
 {-# LANGUAGE Trustworthy #-}
 #endif
@@ -63,9 +64,16 @@ module Data.Hashable
     , hashByteArray
     , hashByteArrayWithSalt
 #endif
+    -- * Caching hashes
+    , Hashed
+    , hashed
+    , unhashed
+    , mapHashed
+    , traverseHashed
     ) where
 
 import Data.Hashable.Class
+
 #ifdef GENERICS
 import Data.Hashable.Generic ()
 #endif
