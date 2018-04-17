@@ -1,3 +1,34 @@
+## Version 1.2.7.0
+
+ * Add `Hashable` and `Hashable1` instances for `Complex`
+
+ * Fix undefined behavior in `hashable_fn_hash()` implementation
+   due to signed integer overflow (#152)
+
+ * Mark `Data.Hashable.Lifted` as `Trustworthy` (re SafeHaskell)
+
+ * Support GHC 8.4
+
+## Version 1.2.6.1
+
+ * Use typeRepFingerprint from Type.Reflection.Unsafe
+
+ * Bump minimum version of base to 4.4.
+
+## Version 1.2.6.0
+
+ * Add support for type-indexed `Typeable`.
+
+ * Rework the `Generic` hashable for sums.
+
+## Version 1.2.5.0
+
+  * Add `Hashable1` and `Hashable2`
+
+  * Add instances for: `Eq1`, `Ord1`, `Show1`, `Ptr`, `FunPtr`, `IntPtr`, `WordPtr`
+
+  * Add `Hashed` type for caching the `hash` function result.
+
 ## Version 1.2.4.0
 
  * Add instances for: Unique, Version, Fixed, NonEmpty, Min, Max, Arg,
